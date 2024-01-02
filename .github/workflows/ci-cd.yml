@@ -1,0 +1,38 @@
+name: CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+
+    - name: Set up PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '7.4'
+
+    - name: Install Dependencies
+      run: composer install
+
+    - name: Setup Database
+      run: php bin/console doctrine:database:create --env=test
+          
+    - name: Run Migrations
+      run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
+
+    - name: Run PHPUnit
+      run: php bin/phpunit
+
+     - name: Deploy to Production
+     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+       run: |
+        ssh user@your-server "cd /path/to/your/app && git pull origin main && composer install && php bin/console doctrine:migrations:migrate --no-interaction && php bin/console cache:clear --env=prod && php bin/console assets:install --env=prod && php bin/console assetic:dump --env=prod"
+
