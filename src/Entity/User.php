@@ -6,14 +6,15 @@ use App\Repository\UserRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: '`user`')]
-class User
+class User implements UserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
-    #[ORM\Column]
+    #[ORM\Column(unique: true)]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
@@ -28,7 +29,7 @@ class User
     #[ORM\Column(length: 255)]
     private ?string $lastName = null;
 
-    #[ORM\Column(length: 255)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $email = null;
 
     #[ORM\Column(length: 255)]
@@ -230,4 +231,10 @@ class User
 
         return $this;
     }
+
+    public function getRoles(){
+        return ['ROLE_USER'];
+    }
+    public function eraseCredentials(){}
+    public function getSalt(){}
 }
